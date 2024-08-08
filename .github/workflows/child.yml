@@ -14,13 +14,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init
-        
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: instance_ip
+          path: ./terraform
+
+      - name: Read IP Address
+        id: read-ip
+        run: |
+          INSTANCE_IP=$(cat terraform/instance_ip.txt)
+          echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
+
       - name: Wait for 100 seconds
         run: sleep 100
 
       - name: Verify Apache Installation
         run: |
-          curl http://$(terraform output -json instance_public_ip | jq -r '.')  | grep "HTTP/1.1 200 OK"
+          curl -I http://$INSTANCE_IP | grep "HTTP/1.1 200 OK"
