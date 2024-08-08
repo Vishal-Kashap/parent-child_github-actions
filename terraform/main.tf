@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "instance1" {
-  ami           = "ami-0b72821e2f351e396"  # Replace with a valid Ubuntu AMI ID for your region
+  ami           = "ami-04a81a99f5ec58529"  # Replace with a valid Ubuntu AMI ID for your region
   instance_type = "t2.micro"
 
   # User data script to install Apache on Ubuntu
