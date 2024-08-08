@@ -9,6 +9,7 @@ on:
 jobs:
   delay_and_verify:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,11 +22,17 @@ jobs:
         id: output
         working-directory: terraform
         run: |
-          INSTANCE_PUBLIC_IP=$(terraform output -raw instance_public_ip)
+          terraform output -json > terraform_outputs.json
+          cat terraform_outputs.json
+
+      - name: Extract Public IP
+        id: extract
+        run: |
+          INSTANCE_PUBLIC_IP=$(jq -r '.instance_public_ip.value' terraform_outputs.json)
           echo "INSTANCE_PUBLIC_IP=${INSTANCE_PUBLIC_IP}" >> $GITHUB_ENV
 
-      - name: Sleep for 3 minutes
-        run: sleep 180  # Sleep for 3 minutes
+      - name: Sleep for 2 minutes
+        run: sleep 120
 
       - name: Verify Apache Installation
         run: |
