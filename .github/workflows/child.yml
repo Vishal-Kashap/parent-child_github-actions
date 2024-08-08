@@ -13,12 +13,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Get Instance Public IP
-        id: get-instance-ip
-        run: |
-          echo "INSTANCE_IP=$(terraform output -json instance_public_ip | jq -r .)" >> $GITHUB_ENV
-
+        
       - name: Verify Apache Installation
         run: |
-          curl -I http://$INSTANCE_IP | grep "HTTP/1.1 200 OK"
+          curl -I http://54.80.210.159 | grep "HTTP/1.1 200 OK"
