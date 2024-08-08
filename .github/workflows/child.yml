@@ -19,6 +19,9 @@ jobs:
         with:
           terraform_version: 1.6.0
 
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
@@ -27,7 +30,12 @@ jobs:
         id: terraform-output
         working-directory: terraform
         run: |
+          echo "Fetching Terraform output..."
+          terraform output -json instance_public_ip
           echo "INSTANCE_IP=$(terraform output -json instance_public_ip | jq -r .)" >> $GITHUB_ENV
+
+      - name: Debug Environment
+        run: echo "INSTANCE_IP is $INSTANCE_IP"
 
       - name: Verify Apache Installation
         run: |
