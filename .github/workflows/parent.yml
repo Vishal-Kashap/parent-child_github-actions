@@ -21,14 +21,18 @@ jobs:
         working-directory: terraform
         run: terraform init
 
-      - name: Terraform Plan
-        working-directory: terraform
-        run: terraform plan
-
       - name: Terraform Apply
         working-directory: terraform
         run: terraform apply -auto-approve
 
-    outputs:
-      instance_id: ${{ steps.terraform.outputs.instance_id }}
-      instance_public_ip: ${{ steps.terraform.outputs.instance_public_ip }}
+      - name: Save Public IP as Artifact
+        working-directory: terraform
+        run: |
+          echo $(terraform output -raw instance_public_ip) > instance_ip.txt
+        continue-on-error: true
+      
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: instance_ip
+          path: terraform/instance_ip.txt
