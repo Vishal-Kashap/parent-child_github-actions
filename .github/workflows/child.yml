@@ -7,36 +7,18 @@ on:
       - completed
 
 jobs:
-  delay_and_verify:
+  verify-apache:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init
-
-      - name: Terraform Output
-        id: output
-        working-directory: terraform
+      - name: Get Instance Public IP
+        id: get-instance-ip
         run: |
-          terraform output -json > terraform_outputs.json
-          cat terraform_outputs.json
-
-      - name: Extract Public IP
-        id: extract
-        run: |
-          INSTANCE_PUBLIC_IP=$(jq -r '.instance_public_ip.value' terraform_outputs.json)
-          echo "INSTANCE_PUBLIC_IP=${INSTANCE_PUBLIC_IP}" >> $GITHUB_ENV
-
-      - name: Sleep for 2 minutes
-        run: sleep 120
+          echo "INSTANCE_IP=$(terraform output -json instance_public_ip | jq -r .)" >> $GITHUB_ENV
 
       - name: Verify Apache Installation
         run: |
-          echo "Instance Public IP: $INSTANCE_PUBLIC_IP"
-          curl -I http://$INSTANCE_PUBLIC_IP | head -n 10
-        env:
-          INSTANCE_PUBLIC_IP: ${{ env.INSTANCE_PUBLIC_IP }}
+          curl -I http://$INSTANCE_IP | grep "HTTP/1.1 200 OK"
