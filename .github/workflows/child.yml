@@ -13,7 +13,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
+      - name: Install Terraform CLI
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Output
+        id: terraform-output
+        working-directory: terraform
+        run: |
+          echo "INSTANCE_IP=$(terraform output -json instance_public_ip | jq -r .)" >> $GITHUB_ENV
+
       - name: Verify Apache Installation
         run: |
-          curl -I http://54.80.210.159 | grep "HTTP/1.1 200 OK"
+          curl -I http://$INSTANCE_IP | grep "HTTP/1.1 200 OK"
