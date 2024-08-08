@@ -13,13 +13,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sleep for 2 minutes
-        run: sleep 120  # Sleep for 2 minutes
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Output
+        id: output
+        working-directory: terraform
+        run: |
+          INSTANCE_PUBLIC_IP=$(terraform output -raw instance_public_ip)
+          echo "INSTANCE_PUBLIC_IP=${INSTANCE_PUBLIC_IP}" >> $GITHUB_ENV
+
+      - name: Sleep for 3 minutes
+        run: sleep 180  # Sleep for 3 minutes
 
       - name: Verify Apache Installation
         run: |
-          INSTANCE_PUBLIC_IP=$(terraform output -raw instance_public_ip)
           echo "Instance Public IP: $INSTANCE_PUBLIC_IP"
-          
-          # Check if Apache is installed and running
           curl -I http://$INSTANCE_PUBLIC_IP | head -n 10
+        env:
+          INSTANCE_PUBLIC_IP: ${{ env.INSTANCE_PUBLIC_IP }}
